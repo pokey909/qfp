@@ -3,10 +3,15 @@ from __future__ import division
 import numpy as np
 from numpy.lib import stride_tricks
 from scipy.ndimage.filters import maximum_filter, minimum_filter
+from scipy import signal
 from bisect import bisect_left
 from collections import namedtuple
 from itertools import izip
 from heapq import nlargest
+import matplotlib
+matplotlib.use('macosx')
+import matplotlib.pyplot as plt
+Peak = namedtuple('Peak', ['x', 'y'])
 
 
 def stft(samples, framesize=1024, hopsize=32):
@@ -32,13 +37,24 @@ def stft(samples, framesize=1024, hopsize=32):
     return spec
 
 
+def stft_scipy(samples, framesize=1024, hopsize=32):
+    # f, t, Zxx = signal.stft(samples, 16000, nperseg=framesize, noverlap=framesize - hopsize)
+    # spec = np.abs(Zxx)
+    f, t, Zxx = signal.spectrogram(np.array(samples), 16000, scaling='spectrum', mode='magnitude', nperseg=framesize, noverlap=framesize - hopsize)
+    spec = Zxx
+    with np.errstate(divide='ignore'):  # silences "divide by zero" error
+        spec = 20. * np.log10(np.abs(spec) / 10e-6)  # amplitude to decibel
+    # with np.errstate(divide='ignore'):  # silences "divide by zero" error
+    #     spec = 20. * np.log10(np.abs(spec) / 10e-6)  # amplitude to decibel
+    return spec.transpose()
+
+
 def find_peaks(spec, maxWidth, maxHeight, minWidth=3, minHeight=3):
     """
     Calculate peaks of spectrogram using maximum filter
     Local minima used to filter out uniform areas (e.g. silence)
     Returns: list of namedtuple Peaks
     """
-    Peak = namedtuple('Peak', ['x', 'y'])
     maxFilterDimen = (maxWidth, maxHeight)
     minFilterDimen = (minWidth, minHeight)
     maxima = maximum_filter(spec, footprint=np.ones(
@@ -46,9 +62,33 @@ def find_peaks(spec, maxWidth, maxHeight, minWidth=3, minHeight=3):
     minima = minimum_filter(spec, footprint=np.ones(
         minFilterDimen, dtype=np.int8))
     peaks = ((spec == maxima) == (maxima != minima))
+
     # todo: parabolic interpolation
     x, y = np.nonzero(peaks)
     namedpeaks = [Peak(p[0], p[1]) for p in izip(x, y)]
+
+    figsize = [10, 8]
+    nplots_hori = 3
+    nplots_vert = 1
+
+    fig, ax = plt.subplots(nplots_vert, nplots_hori, figsize=figsize)
+    if nplots_vert == 1: ax = ax.reshape(1, len(ax))
+
+    plt.tight_layout()
+    plt.sca(ax[0, 0])
+    plt.imshow(spec, aspect='auto')
+    plt.plot(y, x, 'ro')
+    plt.tight_layout()
+    plt.sca(ax[0, 1])
+    plt.imshow(maxima, aspect='auto')
+    plt.plot(y, x, 'ro')
+    plt.tight_layout()
+    plt.sca(ax[0, 2])
+    plt.imshow(peaks, aspect='auto')
+    plt.plot(y, x, 'ro')
+
+    plt.show()
+
     return namedpeaks
 
 

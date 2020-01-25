@@ -1,9 +1,9 @@
 from __future__ import division
 
-from .audio import load_audio
-from .utils import stft, find_peaks, generate_hash, n_strongest
+from .audio2 import load_stream, spec
+from .utils2 import stft, find_peaks, generate_hash, n_strongest, stft_scipy
 from .quads import find_quads
-
+import librosa as rosa
 
 class fpType:
     """
@@ -51,13 +51,26 @@ class Fingerprint:
         Creates quad hashes for a given audio file
         """
         q, r, c, w, h = self.params
-        samples = load_audio(self.path, snip=snip)
-        spectrogram = stft(samples)
+        samples = load_stream(self.path, snip=snip)
+        spectrogram = spec(samples)
+
         self.peaks = list(find_peaks(spectrogram, w, h))
         quads = find_quads(self.peaks, r, c)
         self.strongest = n_strongest(spectrogram, quads, q)
         self.hashes = [generate_hash(q) for q in self.strongest]
 
+
+    def create_from_buffer(self, audio_data, snip=None):
+        """
+        Creates quad hashes for a given audio buffer
+        """
+        q, r, c, w, h = self.params
+        samples = load_audio(self.path, snip=snip)
+        spectrogram = stft_scipy(samples)
+        self.peaks = list(find_peaks(spectrogram, w, h))
+        quads = find_quads(self.peaks, r, c)
+        self.strongest = n_strongest(spectrogram, quads, q)
+        self.hashes = [generate_hash(q) for q in self.strongest]
 
 class ReferenceFingerprint(Fingerprint):
 

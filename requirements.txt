@@ -1,0 +1,7 @@
+matplotlib==2.0.2
+futures
+ffmpeg
+pydub
+scipy
+librosa
+pysoundfile
