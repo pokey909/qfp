@@ -34,9 +34,9 @@ def fingerprint(filenames):
                 pass
 
 
-def fingerprint_noStore(name):
-    db = QfpDB()
-    with sqlite3.connect('qfp.db') as conn:
+def fingerprint_noStore((name, db_path)):
+    db = QfpDB(db_path)
+    with sqlite3.connect(db_path) as conn:
         conn.text_factory = lambda x: unicode(x, 'utf-8', 'ignore')
         c = conn.cursor()
         title = os.path.basename(name)
@@ -61,15 +61,20 @@ def createFingerprintsSerial(data_dir):
     fingerprint(matches)
 
 
-def createFingerprintsParallel(tracks, num_jobs=1):
-    db = QfpDB()
+def fingerprint_noStore_wrapper(args):
+    return fingerprint_noStore(*args)
+
+
+def createFingerprintsParallel(tracks, db_dir, num_jobs=1):
+    db_path=db_dir+'/qfb.db'
+    print(db_path)
+    db = QfpDB(db_path=db_path)
     with closing(mp.Pool(processes=num_jobs)) as pool:
-        fp = pool.imap(fingerprint_noStore, tracks)
+        fp = pool.imap(fingerprint_noStore, zip(tracks, [db_path]*len(tracks)))
         for fp_r, title in fp:
             if fp_r is not None:
                 print("Storing " + title + "...")
                 db.store(fp_r, title)
-        pool.join()
 
 
 def find_files(data_dir):
@@ -81,11 +86,13 @@ def find_files(data_dir):
     return matches
 
 
-def main(data_dir):
+def main(data_dir, db_dir):
     reference_tracks = find_files(data_dir) #'../data/mixotic/refsongs')
     # createFingerprintsSerial(reference_tracks)
-    createFingerprintsParallel(reference_tracks, 8)
+    createFingerprintsParallel(reference_tracks, db_dir, 8)
 
 
 if __name__ == '__main__':
-    main(str(sys.argv)[0])
+    data_dir = str(sys.argv[1])
+    db_dir = str(sys.argv[2])
+    main(data_dir, db_dir)

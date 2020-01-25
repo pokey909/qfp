@@ -8,8 +8,8 @@ from bisect import bisect_left
 from collections import namedtuple
 from itertools import izip
 from heapq import nlargest
-import matplotlib
-matplotlib.use('macosx')
+# import matplotlib
+# matplotlib.use('macosx')
 import matplotlib.pyplot as plt
 Peak = namedtuple('Peak', ['x', 'y'])
 
@@ -67,27 +67,27 @@ def find_peaks(spec, maxWidth, maxHeight, minWidth=3, minHeight=3):
     x, y = np.nonzero(peaks)
     namedpeaks = [Peak(p[0], p[1]) for p in izip(x, y)]
 
-    figsize = [10, 8]
-    nplots_hori = 3
-    nplots_vert = 1
-
-    fig, ax = plt.subplots(nplots_vert, nplots_hori, figsize=figsize)
-    if nplots_vert == 1: ax = ax.reshape(1, len(ax))
-
-    plt.tight_layout()
-    plt.sca(ax[0, 0])
-    plt.imshow(spec, aspect='auto')
-    plt.plot(y, x, 'ro')
-    plt.tight_layout()
-    plt.sca(ax[0, 1])
-    plt.imshow(maxima, aspect='auto')
-    plt.plot(y, x, 'ro')
-    plt.tight_layout()
-    plt.sca(ax[0, 2])
-    plt.imshow(peaks, aspect='auto')
-    plt.plot(y, x, 'ro')
-
-    plt.show()
+    # figsize = [10, 8]
+    # nplots_hori = 3
+    # nplots_vert = 1
+    #
+    # fig, ax = plt.subplots(nplots_vert, nplots_hori, figsize=figsize)
+    # if nplots_vert == 1: ax = ax.reshape(1, len(ax))
+    #
+    # plt.tight_layout()
+    # plt.sca(ax[0, 0])
+    # plt.imshow(spec, aspect='auto')
+    # plt.plot(y, x, 'ro')
+    # plt.tight_layout()
+    # plt.sca(ax[0, 1])
+    # plt.imshow(maxima, aspect='auto')
+    # plt.plot(y, x, 'ro')
+    # plt.tight_layout()
+    # plt.sca(ax[0, 2])
+    # plt.imshow(peaks, aspect='auto')
+    # plt.plot(y, x, 'ro')
+    #
+    # plt.show()
 
     return namedpeaks
 
