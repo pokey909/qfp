@@ -1,4 +1,3 @@
-from pydub import AudioSegment
 import librosa as rosa
 import librosa.util as util
 import librosa.display as disp

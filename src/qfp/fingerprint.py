@@ -1,7 +1,7 @@
 from __future__ import division
 
-from .audio2 import load_stream, spec
-from .utils2 import stft, find_peaks, generate_hash, n_strongest, stft_scipy
+from .audio import load_stream, spec
+from .utils import stft, find_peaks, generate_hash, n_strongest, stft_scipy
 from .quads import find_quads
 import librosa as rosa
 

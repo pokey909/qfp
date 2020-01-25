@@ -3,14 +3,12 @@
 
 from qfp import ReferenceFingerprint
 from qfp.db import QfpDB
-import numpy as np
-import concurrent.futures
 import fnmatch
 import os
 import sqlite3
 import multiprocessing as mp
 from contextlib import closing
-
+import sys
 
 def split_list(alist, wanted_parts=1):
     length = len(alist)
@@ -83,11 +81,11 @@ def find_files(data_dir):
     return matches
 
 
-def main():
-    reference_tracks = find_files('data/mixotic/refsongs')
+def main(data_dir):
+    reference_tracks = find_files(data_dir) #'../data/mixotic/refsongs')
     # createFingerprintsSerial(reference_tracks)
     createFingerprintsParallel(reference_tracks, 8)
 
 
 if __name__ == '__main__':
-    main()
+    main(str(sys.argv)[0])
